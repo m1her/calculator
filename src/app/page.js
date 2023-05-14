@@ -1,113 +1,373 @@
-import Image from 'next/image'
+"use client";
+import { useState } from "react";
 
 export default function Home() {
+  const [input, setInput] = useState("0");
+  const [result, setResult] = useState("");
+  const [equalFlag, setEqualFlag] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  function handleClick(e) {
+    const value = e.target.getAttribute("data-value");
+
+    switch (value) {
+      case "clear":
+        setInput("0");
+        setResult("");
+        setEqualFlag(false);
+        break;
+      case "equal":
+        try {
+          if (
+            input === "-" ||
+            input === "X" ||
+            input === "/" ||
+            input === "+" ||
+            input === "."
+          ) {
+            const results = result.slice(0, -1);
+            setInput(results.toString());
+            setResult(result.slice(0, -1) + "=" + results);
+          } else if (equalFlag || result === "") {
+          } else {
+            const results = eval(result);
+            setInput(results.toString());
+            setResult(result + "=" + results);
+          }
+          setEqualFlag(true);
+        } catch (error) {
+          setInput("Error");
+          setTimeout(() => {
+            setInput("");
+            setResult("");
+          }, 1000);
+        }
+        break;
+      case "+": {
+        if (input === "+") {
+          break;
+        } else if (input === "-" || input === "X" || input === "/") {
+          setInput("+");
+          setResult(result.slice(0, -1) + value);
+        } else if (equalFlag) {
+          setResult(input + "+");
+          setInput("+");
+          setEqualFlag(false);
+        } else {
+          setInput("+");
+          setResult(result + value);
+          break;
+        }
+        break;
+      }
+      case "-": {
+        if (input === "-") {
+          break;
+        } else if (input === "+" || input === "X" || input === "/") {
+          setInput("-");
+          setResult(result + "-");
+        } else if (equalFlag) {
+          setResult(input + "-");
+          setInput("-");
+          setEqualFlag(false);
+        } else {
+          setInput("-");
+          setResult(result + value);
+          break;
+        }
+        break;
+      }
+      case "/": {
+        if (input === "/") {
+          break;
+        } else if (input === "-" || input === "X" || input === "+") {
+          setInput("/");
+          setResult(result.slice(0, -1) + value);
+        } else if (equalFlag) {
+          setResult(input + "/");
+          setInput("/");
+          setEqualFlag(false);
+        } else {
+          setInput("/");
+          setResult(result + value);
+          break;
+        }
+        break;
+      }
+      case "X": {
+        if (input === "X") {
+          break;
+        } else if (input === "-" || input === "+" || input === "/") {
+          setInput("X");
+          setResult(result.slice(0, -1) + value);
+        } else if (equalFlag) {
+          setResult(input + "*");
+          setInput("X");
+          setEqualFlag(false);
+        } else {
+          setInput("X");
+          setResult(result + "*");
+          break;
+        }
+        break;
+      }
+
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+      case "0": {
+        if (input.length <= 18) {
+          if (
+            input === "-" ||
+            input === "X" ||
+            input === "/" ||
+            input === "+" ||
+            input === "0"
+          ) {
+            setInput(value);
+            setResult(result + value);
+          } else if (equalFlag) {
+            setInput(value);
+            setResult(value);
+            setEqualFlag(false);
+          } else {
+            setInput(input + value);
+            setResult(result + value);
+          }
+        } else {
+          setIsDisabled(true);
+          let temp = input;
+          setInput("DIGIT LIMIT MET");
+          setTimeout(() => {
+            setInput(temp);
+            setIsDisabled(false);
+            console.log(input.length);
+          }, 1000);
+        }
+        break;
+      }
+      case ".": {
+        if (input.length <= 18) {
+          if (
+            input === "-" ||
+            input === "X" ||
+            input === "/" ||
+            input === "+"
+          ) {
+            setInput("0" + value);
+            setResult(result + value);
+          } else if (input === "" || equalFlag) {
+            setInput("0" + value);
+            setResult("0" + value);
+            setEqualFlag(false);
+          } else if (input.includes(".")) {
+          } else {
+            setInput(input + value);
+            setResult(result + value);
+          }
+        } else {
+          setIsDisabled(true);
+          let temp = input;
+          setInput("DIGIT LIMIT MET");
+          setTimeout(() => {
+            setInput(temp);
+            setIsDisabled(false);
+            console.log(input.length);
+          }, 1000);
+        }
+        break;
+      }
+
+      default:
+        {
+          console.log("test");
+        }
+        break;
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="flex min-h-screen w-screen flex-col items-center justify-between p-24 bg-[#d0d0d0] font-mono">
+      <div className="bg-[#222831] rounded-sm p-2 w-[300px]">
+        <div className="bg-[#222831] rounded-sm mb-2 ">
+          <div
+            className="text-[#e29f3a] w-full h-fit min-h-[28px] break-words text-right"
+            id="display"
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <p>{result}</p>
+          </div>
+          <div
+            className="text-white text-xl w-full h-fit min-h-[32px] break-words text-right"
+            id="display"
+          >
+            {input}
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-[1px] grid-rows-[60px,60px,60px,60px,60px]">
+          <button
+            id="clear"
+            className="bg-[#0070b5] text-white font-bold rounded-sm py-2 px-4 col-span-2"
+            onClick={handleClick}
+            data-value="clear"
+          >
+            AC
+          </button>
+          <button
+            id="divide"
+            className="bg-[#535962] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="/"
+            disabled={isDisabled}
+          >
+            /
+          </button>
+          <button
+            id="multiply"
+            className="bg-[#535962] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="X"
+            disabled={isDisabled}
+          >
+            x
+          </button>
+          <button
+            id="seven"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="7"
+            disabled={isDisabled}
+          >
+            7
+          </button>
+          <button
+            id="eight"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="8"
+            disabled={isDisabled}
+          >
+            8
+          </button>
+          <button
+            id="nine"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="9"
+            disabled={isDisabled}
+          >
+            9
+          </button>
+          <button
+            id="subtract"
+            className="bg-[#535962] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="-"
+            disabled={isDisabled}
+          >
+            -
+          </button>
+          <button
+            id="four"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="4"
+            disabled={isDisabled}
+          >
+            4
+          </button>
+          <button
+            id="five"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="5"
+            disabled={isDisabled}
+          >
+            5
+          </button>
+          <button
+            id="six"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="6"
+            disabled={isDisabled}
+          >
+            6
+          </button>
+          <button
+            id="add"
+            className="bg-[#535962] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="+"
+            disabled={isDisabled}
+          >
+            +
+          </button>
+          <button
+            id="one"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="1"
+            disabled={isDisabled}
+          >
+            1
+          </button>
+          <button
+            id="two"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="2"
+            disabled={isDisabled}
+          >
+            2
+          </button>
+          <button
+            id="three"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="3"
+            disabled={isDisabled}
+          >
+            3
+          </button>
+          <button
+            id="equals"
+            className="bg-[#00ADB5] text-white font-bold rounded-sm py-2 px-4 row-span-2"
+            onClick={handleClick}
+            data-value="equal"
+            disabled={isDisabled}
+          >
+            =
+          </button>
+          <button
+            id="zero"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4 col-span-2"
+            onClick={handleClick}
+            data-value="0"
+            disabled={isDisabled}
+          >
+            0
+          </button>
+          <button
+            id="decimal"
+            className="bg-[#393E46] text-white font-bold rounded-sm py-2 px-4"
+            onClick={handleClick}
+            data-value="."
+            disabled={isDisabled}
+          >
+            .
+          </button>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <p className="font-mono font-medium mt-7">
+        Coded by{" "}
+        <span className="font-mono font-medium text-[#00ADB5]">m1her</span>
+      </p>
     </main>
-  )
+  );
 }
